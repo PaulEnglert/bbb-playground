@@ -1,10 +1,29 @@
 import express from "express";
 
+import * as errs from './errors';
+
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
-import temperatureRouter from "./temperature";
+import temperatureRouterFactory from "./temperature";
 import servoRouter from "./servo";
+
+// configure the hardware
+const temperatureSensors = [{
+  pins: {
+    signal: 'P9_40',
+    power: 'P9_6',
+    ground: 'P9_34'
+  }
+}];
+
+const servos = [{
+  pins: {
+    signal: 'P9_14',
+    power: 'P9_5',
+    ground: 'P9_1'
+  }
+}];
 
 
 // prepare global router
@@ -17,12 +36,13 @@ const app = express();
 export default app;
 app.use(express.json());
 const apis = [
-  ["/temperature", temperatureRouter],
+  ["/temperature", temperatureRouterFactory(temperatureSensors)],
   ["/servo", servoRouter],
   ["/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs())],
   ["/", globalRouter],
 ];
 apis.map(api => app.use(...api));
+app.use(errorHandler);
 
 
 // start server
@@ -64,6 +84,23 @@ function getHome() {
   return (_, res) => {
     res.json(data);
   }
+}
+
+/**
+ * errorHandler() returns a middleware that will handle errors
+ * properly as long as they have been using the errors defined
+ * in the 'error' package.
+ *
+ *
+ */
+function errorHandler (err, req, res, next) {
+  if (err.name === errs.NotFoundError.name)
+    res.status(404);
+  else if (err.name === errs.BadRequestError.name)
+    res.status(400)
+  else // if (err.name === errs.InternalServerError.name)
+    res.status(500)
+  res.json({ message: err.message, name: err.name });
 }
 
 
