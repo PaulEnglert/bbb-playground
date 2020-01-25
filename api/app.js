@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
 import temperatureRouterFactory from "./temperature";
-import servoRouter from "./servo";
+import servoRouterFactory from "./servo";
 
 // configure the hardware
 const temperatureSensors = [{
@@ -37,7 +37,7 @@ export default app;
 app.use(express.json());
 const apis = [
   ["/temperature", temperatureRouterFactory(temperatureSensors)],
-  ["/servo", servoRouter],
+  ["/servo", servoRouterFactory(servos)],
   ["/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs())],
   ["/", globalRouter],
 ];
