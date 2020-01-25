@@ -1,0 +1,23 @@
+{
+  "name": "bbb-playground",
+  "version": "0.0.0",
+  "description": "Playground For BeagleBone Black",
+  "main": "app.js",
+  "scripts": {
+    "serve": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PaulEnglert/bbb-playground.git"
+  },
+  "keywords": [
+    "beagleboneblack"
+  ],
+  "author": "Paul Englert",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PaulEnglert/bbb-playground/issues"
+  },
+  "homepage": "https://github.com/PaulEnglert/bbb-playground#readme"
+}
