@@ -32,7 +32,7 @@ export default function routerFactory(sensors) {
   // setup routes
   const router = express.Router();
   router.get('/', getSensors(sensors));
-  router.get('/:id', getTemperature(sensors));
+  router.get('/:id/temperature', getTemperature(sensors));
 
   // return router
   return router;
@@ -92,7 +92,7 @@ function getSensors(sensors) {
  * get api route for the given sensor.
  *
  * @swagger
- * /temperature/{id}:
+ * /temperature/{id}/temperature:
  *  get:
  *    tags:
  *      - Temperature
