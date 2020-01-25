@@ -2,9 +2,9 @@
   "name": "bbb-playground",
   "version": "0.0.0",
   "description": "Playground For BeagleBone Black",
-  "main": "app.js",
+  "main": "dist/app.js",
   "scripts": {
-    "start-dev": "node app.js",
+    "start-dev": "nodemon app.js",
     "start-prod": "pm2 start app.js",
     "stop-prod": "pm2 stop app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,5 +25,10 @@
   "dependencies": {
     "bonescript": "^0.7.4-beta1",
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "nodemon": "^2.0.2"
   }
 }
