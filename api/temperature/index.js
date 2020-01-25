@@ -65,8 +65,15 @@ export default function routerFactory(sensors) {
  *                  id:
  *                    type: number
  *                    format: integer
- *                  pin:
- *                    type: string
+ *                  pins:
+ *                    type: object
+ *                    properties:
+ *                      signal:
+ *                        type: string
+ *                      ground:
+ *                        type: string
+ *                      power:
+ *                        type: string
  */
 function getSensors(sensors) {
   const data = sensors.map(({ pins }, idx) => {
