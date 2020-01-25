@@ -117,8 +117,12 @@ function swaggerSpecs() {
       info: {
         title: 'BBB Playground API',
         version: '0.0.0',
-          description: 'BeagleBone Black Playground APIs',
+        description: 'BeagleBone Black Playground APIs',
       },
+      servers: [
+        {description: "Development", url:""},
+        {description: "BBB", url:"http://beaglebone.wifi/bbb-playground"},
+      ]
     },
     apis: ['./api/**/*.js'],
   });
