@@ -1,6 +1,7 @@
 import express from "express";
 
 import temperatureRouter from "./temperature";
+import servoRouter from "./servo";
 
 
 // setup app
@@ -11,6 +12,7 @@ app.use(express.json());
 // configure apis
 const apis = [
 	["/temperature", temperatureRouter],
+	["/servo", servoRouter],
 ];
 
 const globalRouter = express.Router();
