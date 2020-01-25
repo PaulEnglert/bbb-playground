@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/PaulEnglert/bbb-playground/issues"
   },
-  "homepage": "https://github.com/PaulEnglert/bbb-playground#readme"
+  "homepage": "https://github.com/PaulEnglert/bbb-playground#readme",
+  "dependencies": {
+    "bonescript": "^0.7.4-beta1",
+    "express": "^4.17.1"
+  }
 }
