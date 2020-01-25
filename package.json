@@ -4,7 +4,9 @@
   "description": "Playground For BeagleBone Black",
   "main": "app.js",
   "scripts": {
-    "serve": "node app.js",
+    "start-dev": "node app.js",
+    "start-prod": "pm2 start app.js",
+    "stop-prod": "pm2 stop app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
