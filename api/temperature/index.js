@@ -11,7 +11,7 @@ import { NotFoundError } from '../errors';
  * ```
  * // example entry of the sensors argument:
  * {
- *   signalPin: "P9_40"
+ *   pins: {signal: "P9_40"}
  * }
  * ```
  *
