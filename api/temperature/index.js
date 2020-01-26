@@ -21,8 +21,7 @@ import { NotFoundError } from '../errors';
 export default function routerFactory(sensors) {
 
   // validate sensors
-  if (!sensors || sensors.length < 1)
-    throw new Error('Require at least 1 sensor configuration!');
+  if (!sensors) sensors = []
   if (!(sensors instanceof Array)) sensors = [sensors];
   sensors.forEach(({ pins }) => {
     if (!pins || !pins.signal || pins.signal == '')

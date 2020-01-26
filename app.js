@@ -1,2 +1,5 @@
 require("babel-register");
-require("./api/app");
+
+const hardware = require("./hardware");
+const server = require("./server");
+require("./api").serve(server, hardware);

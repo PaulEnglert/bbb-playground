@@ -8,32 +8,42 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import temperatureRouterFactory from "./temperature";
 import servoRouterFactory from "./servo";
 
-import { temperatureSensors, servos } from './hardware';
+
+/**
+ * serve() constructs and runs the api for the given
+ * hardware configuration.
+ *
+ * server: {port: <int>}
+ * hardware: {temperatureSensors: see temperature api, servos: see servo api}
+ *
+ */
+export function serve(server, hardware) {
+
+  const { port } = server;
+  const { temperatureSensors, servos } = hardware;
+
+  // prepare global router
+  const globalRouter = express.Router();
+  globalRouter.get("/", getHome());
 
 
-// prepare global router
-const globalRouter = express.Router();
-globalRouter.get("/", getHome());
+  // configure express app
+  const app = express();
+  app.use(express.json());
+  const apis = [
+    ["/temperature", temperatureRouterFactory(temperatureSensors)],
+    ["/servo", servoRouterFactory(servos)],
+    ["/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs())],
+    ["/", globalRouter],
+  ];
+  apis.map(api => app.use(...api));
+  app.use(errorHandler);
 
 
-// configure express app
-const app = express();
-export default app;
-app.use(express.json());
-const apis = [
-  ["/temperature", temperatureRouterFactory(temperatureSensors)],
-  ["/servo", servoRouterFactory(servos)],
-  ["/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs())],
-  ["/", globalRouter],
-];
-apis.map(api => app.use(...api));
-app.use(errorHandler);
+  // start server
+  app.listen(port, () => console.log(`BBB Playground API ready: http://localhost:${port}`));
 
-
-// start server
-const port = process.env.PORT || 36000;
-app.listen(port, () => console.log(`BBB Playground API ready: http://localhost:${port}`));
-
+}
 
 /**
  * getHome() produces a request hander for the globaç

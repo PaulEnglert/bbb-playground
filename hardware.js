@@ -4,7 +4,7 @@
  *
  *
  */
-export const temperatureSensors = [
+const temperatureSensors = [
   {
     pins: {
       signal: 'P9_40',
@@ -19,7 +19,7 @@ export const temperatureSensors = [
  *
  *
  */
-export const servos = [
+const servos = [
   {
     dutyCycle: {
       min: 0.043,
@@ -32,3 +32,5 @@ export const servos = [
     }
   }
 ];
+
+module.exports = {temperatureSensors, servos};

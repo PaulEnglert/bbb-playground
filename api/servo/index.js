@@ -22,8 +22,7 @@ import { NotFoundError, BadRequestError } from '../errors';
 export default function routerFactory(servos) {
 
   // validate servos
-  if (!servos || servos.length < 1)
-    throw new Error('Require at least 1 servo configuration!');
+  if (!servos) servos = [];
   if (!(servos instanceof Array)) servos = [servos];
   servos.forEach(({ pins, dutyCycle }) => {
     if (!pins || !pins.signal || pins.signal == '')
