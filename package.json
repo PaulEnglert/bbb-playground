@@ -5,8 +5,9 @@
   "main": "dist/app.js",
   "scripts": {
     "start-dev": "nodemon app.js",
-    "start-prod": "pm2 start app.js",
-    "stop-prod": "pm2 stop app.js",
+    "start-prod": "pm2 start app.js --name \"bbb-playground-api\"",
+    "restart-prod": "pm2 restart bbb-playground-api",
+    "stop-prod": "pm2 stop bbb-playground-api",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
