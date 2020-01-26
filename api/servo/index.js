@@ -190,7 +190,7 @@ function setPosition(mgr) {
     const pos = req.body['position'];
     if (mgr.exists(id)){
       mgr.queuePosition(id, pos)
-      res.json(mgr.read(id));
+      res.json(mgr.getLastPosition(id));
     } else {
       next(new NotFoundError(`Servo ID: ${id}`));
     }
