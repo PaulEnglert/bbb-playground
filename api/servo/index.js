@@ -132,7 +132,7 @@ function getPosition(mgr) {
   return (req, res, next) => {
     const id = req.params['id'];
     if (mgr.exists(id))
-      res.json(mgr.read(id));
+      res.json(mgr.getLastPosition(id));
     else
       next(new NotFoundError(`Servo ID: ${id}`));
   }
@@ -189,12 +189,8 @@ function setPosition(mgr) {
     const id = req.params['id'];
     const pos = req.body['position'];
     if (mgr.exists(id)){
-      if (mgr.isWriting(id)) {
-        next(new BadRequestError(`Servo with ID ${id} is busy`));
-      } else {
-        mgr.write(id, pos)
-        res.json(mgr.read(id));
-      }
+      mgr.queuePosition(id, pos)
+      res.json(mgr.read(id));
     } else {
       next(new NotFoundError(`Servo ID: ${id}`));
     }
@@ -206,10 +202,36 @@ function setPosition(mgr) {
  * can be used to init, write and read to/from the servos.
  *
  */
-function servoManager(servos) {
+function servoManager(servos, writeFrequencyHz = 10) {
 
+  // cache last position of servo to
+  // serve the read() function.
   const cache = servos.map(_ => null);
-  const writing = servos.map(_ => false);
+
+  // queue of positional updates that need
+  // to be written to the servos.
+  const queue = servos.map(_ => []);
+
+  // init workers with the given frequency in Hertz (cycles per second)
+  function writerCycler(id) {
+    if (queue[id].length > 0) {
+      // get servo info
+      const {pins, dutyCycle} = servos[id];
+      // get pos, reset queue and cache last position
+      let pos = queue[id].pop();
+      queue[id] = [];
+      cache[id] = pos;
+      // compute duty
+      pos = (pos < 0 ? 0 : (pos > 1 ? 1 : pos));
+      const dc = (pos * (dutyCycle.max - dutyCycle.min)) + dutyCycle.min;
+      // write
+      writeServoPosition_dc(pins.signal, dc);
+    }
+    setTimeout(writerCycler, 1000/writeFrequencyHz, id);
+  }
+  servos.forEach((_, idx) => {
+    setTimeout(writerCycler, 1000/writeFrequencyHz, idx);
+  });
 
   return {
     /**
@@ -219,7 +241,7 @@ function servoManager(servos) {
     init: function (pos = 0.5) {
       servos.forEach(({ pins }, idx) => {
         initServoPin(pins.signal);
-        this.write(idx, pos);
+        this.queuePosition(idx, pos);
       });
     },
     /**
@@ -229,28 +251,15 @@ function servoManager(servos) {
       return id >= 0 && id < servos.length;
     },
     /**
-     * isWriting() returns true if the manager currently writes to the servo.
+     * queuePosition() adds the position for the servo into the queue.
      */
-    isWriting: function (id) {
-      return writing[id] || false;
+    queuePosition: function (id, pos) {
+      queue[id].push(pos);
     },
     /**
-     * write() updates the position of the servo.
+     * getLastPosition() returns the last set position of the servo.
      */
-    write: function (id, pos) {
-      if (writing[id])
-        throw new Error(`Cannot concurrently write to servo: ${id}`);
-      writing[id] = true;
-      const {pins, dutyCycle} = servos[id];
-      const dc = (((pos < 0 ? 0 : (pos > 1 ? 1 : pos))) * (dutyCycle.max - dutyCycle.min)) + dutyCycle.min;
-      writeServoPosition_dc(pins.signal, dc);
-      cache[id] = pos;
-      writing[id] = false;
-    },
-    /**
-     * read() returns the last set position of the servo.
-     */
-    read: function (id) {
+    getLastPosition: function (id) {
       return {
         timestamp: (new Date()).toISOString(),
         position: cache[id]
