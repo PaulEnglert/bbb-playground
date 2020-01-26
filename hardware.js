@@ -22,8 +22,8 @@ const temperatureSensors = [
 const servos = [
   {
     dutyCycle: {
-      min: 0.043,
-      max: 0.136
+      min: 0.044, // 0.043
+      max: 0.135  // 0.136
     },
     pins: {
       signal: 'P9_14',
