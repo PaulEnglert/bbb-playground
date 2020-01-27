@@ -13,11 +13,12 @@ import servoRouterFactory from "./servo";
  * serve() constructs and runs the api for the given
  * hardware configuration.
  *
+ * bbmgr: bbManager instance
  * server: {port: <int>}
  * hardware: {temperatureSensors: see temperature api, servos: see servo api}
  *
  */
-export function serve(server, hardware) {
+export function serve(bbmgr, server, hardware) {
 
   const { port } = server;
   const { temperatureSensors, servos } = hardware;
@@ -31,8 +32,8 @@ export function serve(server, hardware) {
   const app = express();
   app.use(express.json());
   const apis = [
-    ["/temperature", temperatureRouterFactory(temperatureSensors)],
-    ["/servo", servoRouterFactory(servos)],
+    ["/temperature", temperatureRouterFactory(bbmgr, temperatureSensors)],
+    ["/servo", servoRouterFactory(bbmgr, servos)],
     ["/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs())],
     ["/", globalRouter],
   ];

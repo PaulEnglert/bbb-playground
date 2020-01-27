@@ -19,7 +19,7 @@ import { NotFoundError, BadRequestError } from '../errors';
  *
  *
  */
-export default function routerFactory(servos) {
+export default function routerFactory(bbmgr, servos) {
 
   // validate servos
   if (!servos) servos = [];
@@ -31,7 +31,7 @@ export default function routerFactory(servos) {
       throw new Error(`Servo configuration requires property 'dutyCycle.min' and  'dutyCycle.max'!`);
   });
 
-  const mgr = servoManager(servos);
+  const mgr = servoManager(bbmgr, servos);
   mgr.init(.5);
 
   // setup routes
@@ -202,7 +202,7 @@ function setPosition(mgr) {
  * can be used to init, write and read to/from the servos.
  *
  */
-function servoManager(servos, writeFrequencyHz = 10) {
+function servoManager(bbmgr, servos, writeFrequencyHz = 10) {
 
   // cache last position of servo to
   // serve the read() function.
@@ -213,19 +213,21 @@ function servoManager(servos, writeFrequencyHz = 10) {
   const queue = servos.map(_ => []);
 
   // init workers with the given frequency in Hertz (cycles per second)
-  function writerCycler(id) {
+  async function writerCycler(id) {
     if (queue[id].length > 0) {
       // get servo info
       const {pins, dutyCycle} = servos[id];
       // get pos, reset queue and cache last position
       let pos = queue[id].pop();
       queue[id] = [];
-      cache[id] = pos;
       // compute duty
       pos = (pos < 0 ? 0 : (pos > 1 ? 1 : pos));
       const dc = (pos * (dutyCycle.max - dutyCycle.min)) + dutyCycle.min;
       // write
-      writeServoPosition_dc(pins.signal, dc);
+      await bbmgr.pin(pins.signal).analog.write(dc, 60)
+        .then(() => console.log(`Wrote servo position: ${pins.signal} -> ${dc}`));
+      // update cached
+      cache[id] = pos;
     }
     setTimeout(writerCycler, 1000/writeFrequencyHz, id);
   }
@@ -240,7 +242,8 @@ function servoManager(servos, writeFrequencyHz = 10) {
      */
     init: function (pos = 0.5) {
       servos.forEach(({ pins }, idx) => {
-        initServoPin(pins.signal);
+        bbmgr.pin(pins.signal).mode('out')
+          .then(() => console.log(`Updated servo pin mode: ${pins.signal} -> 'out'`));
         this.queuePosition(idx, pos);
       });
     },
@@ -266,20 +269,4 @@ function servoManager(servos, writeFrequencyHz = 10) {
       }
     }
   }
-}
-
-/**
- * writeServoPosition_dc() writes a dutycycle with a given frequency to the pin.
- *
- */
-function writeServoPosition_dc(pinId, dc, freq = 60) {
-  bs.analogWrite(pinId, dc, freq);
-}
-
-/**
- * initServoPin() modifies the pin configuration to be ready for writing.
- *
- */
-function initServoPin(pinId) {
-  bs.pinMode(pinId, bs.OUTPUT);
 }

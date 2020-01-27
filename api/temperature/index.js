@@ -18,7 +18,7 @@ import { NotFoundError } from '../errors';
  *
  *
  */
-export default function routerFactory(sensors) {
+export default function routerFactory(bbmgr, sensors) {
 
   // validate sensors
   if (!sensors) sensors = []
@@ -31,7 +31,7 @@ export default function routerFactory(sensors) {
   // setup routes
   const router = express.Router();
   router.get('/', getSensors(sensors));
-  router.get('/:id/temperature', getTemperature(sensors));
+  router.get('/:id/temperature', getTemperature(bbmgr, sensors));
 
   // return router
   return router;
@@ -128,20 +128,22 @@ function getSensors(sensors) {
  *                  type: number
  *                  format: float
  */
-function getTemperature(sensors) {
+function getTemperature(bbmgr, sensors) {
   return (req, res, next) => {
     const id = req.params['id'];
     if (id >= 0 && id < sensors.length)
-      res.json(readTemperatureData(sensors[id].pins.signal));
+      readTemperatureData(bbmgr, sensors[id].pins.signal)
+        .then(data => res.json(data));
     else
       next(new NotFoundError(`Temperature Sensor ID: ${id}`));
   }
 }
 
 
-function readTemperatureData(pinId) {
+async function readTemperatureData(bbmgr, pinId) {
 
-  const mV = readSensorOutput_mV(pinId);
+  const mV = await bbmgr.pin(pinId).analog.read();
+  console.log(`Read temperature sensor: ${pinId} -> ${mV}`);
   return {
     timestamp: (new Date()).toISOString(),
     millivolts: mV,
